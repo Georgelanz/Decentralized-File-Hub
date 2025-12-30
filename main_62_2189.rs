@@ -1,16 +1,27 @@
-// main.rs - Comprehensive Rust starter script
-struct Project {
-    name: String,
-    version: String,
+use std::net::{TcpListener, TcpStream};
+use std::io::{Read, Write};
+use std::thread;
+
+fn handle_node(mut stream: TcpStream) {
+    let mut buffer = [0; 512];
+    stream.read(&mut buffer).unwrap();
+    // Simulate P2P handshake
+    let response = b"NODE_SYNC_ACK";
+    stream.write(response).unwrap();
 }
+
 fn main() {
-    let p = Project {
-        name: String::from("GitHub Automated Repository Project"),
-        version: String::from("1.0.0"),
-    };
-    println!("Project: {}, Version: {}", p.name, p.version);
-    println!("\nFeatures: Structs, Ownership, Loops");
-    for i in 0..5 {
-        println!("  - Iteration {}", i + 1);
+    println!("[INFO] Starting Decentralized File Hub Node...");
+    let listener = TcpListener::bind("0.0.0.0:8080").unwrap();
+
+    for stream in listener.incoming() {
+        match stream {
+            Ok(stream) => {
+                thread::spawn(|| {
+                    handle_node(stream);
+                });
+            }
+            Err(e) => { println!("Connection failed: {}", e); }
+        }
     }
 }
